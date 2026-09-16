@@ -24,3 +24,5 @@ The plugin exposes these settings in `Config`:
 ## Notes
 
 This project is intended for server-side logging for security reasons only
+
+## [PLAYER PROJECT](https://github.com/WujekFoliarz/SLGameLoggerDisplay)
