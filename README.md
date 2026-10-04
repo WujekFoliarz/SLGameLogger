@@ -10,10 +10,6 @@ The plugin creates round log files under:
 
 `Plugins/SLGameLogger/Logs`
 
-Example file name:
-
-`RoundLog 2026-09-16_12-30-45.scpd`
-
 ## Configuration
 
 The plugin exposes these settings in `Config`:
