@@ -280,5 +280,26 @@ namespace SLGameLogger
                 w.Write(role);
             });
         }
+
+        public void WriteVersion(int major, int minor, int build)
+        {
+            AddPacket(EventEnum.Version, w =>
+            {
+                w.Write(major);
+                w.Write(minor);
+                w.Write(build);
+            });
+        }
+
+        public void WriteMagic()
+        {
+            using (var payloadWriter = new BinaryWriter(_ms, System.Text.Encoding.UTF8, leaveOpen: true))
+            {
+                payloadWriter.Write("sldemo");
+            }
+
+            byte[] payload = _ms.ToArray();
+            _writer.Write(payload);
+        }
     }
 }

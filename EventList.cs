@@ -34,5 +34,6 @@ namespace SLGameLogger
         PlayerJoined,
         PlayerLeft,
         PlayerChangedRoles,
+        Version,
     }
 }

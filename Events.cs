@@ -41,6 +41,7 @@ namespace SLGameLogger
 
             Plugin.Instance.SetNewRoundTime();
             Plugin.Instance.StartCollectingData();
+            Map.Broadcast(10, Plugin.Instance.CurrentLogFileName);
         }
 
         public void OnRoundEnded(Exiled.Events.EventArgs.Server.RoundEndedEventArgs ev)

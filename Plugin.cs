@@ -1,23 +1,28 @@
 ﻿namespace SLGameLogger
 {
-    using System.Diagnostics.Tracing;
     using System.Numerics;
-    using CommandSystem.Commands.Shared;
     using Exiled.API.Features;
-    using Exiled.Events.Features;
     using MEC;
-    using Newtonsoft.Json;
 
     public class Plugin : Plugin<Config>
     {
+        public override Version Version => new(1, 0, 0);
         public static Plugin? Instance { get; private set; }
         private List<TickEvent>? _currentRoundEventLog;
         private List<EventData>? _queuedEventData;
         private CoroutineHandle _writerHandle;
         private Events? _events { get; set; }
-        private static string _directory = Path.Combine(Paths.Plugins, "SLGameLogger", "Logs");
+        public readonly string LogDirectory = Path.Combine(Paths.Plugins, "SLGameLogger", Server.Port.ToString());
         private static DateTime _currentRoundStartTime = DateTime.UtcNow;
         private PacketWriter? _writer;
+        private HttpFileServer? _httpFileServer;
+        private string _currentLogFileName = "";
+
+        public string CurrentLogFileName
+        {
+            get => Volatile.Read(ref _currentLogFileName);
+            set => Volatile.Write(ref _currentLogFileName, value);
+        }
 
         public override void OnEnabled()
         {
@@ -25,7 +30,9 @@
             _events = new();
             _currentRoundEventLog = new();
             _queuedEventData = new();
-            Directory.CreateDirectory(_directory);
+            _httpFileServer = new();
+            _httpFileServer.Start();
+            Directory.CreateDirectory(LogDirectory);
 
             Exiled.Events.Handlers.Server.RoundStarted += _events.OnRoundStarted;
             Exiled.Events.Handlers.Server.RoundEnded += _events.OnRoundEnded;
@@ -69,6 +76,7 @@
                 Exiled.Events.Handlers.Player.ChangingRole -= _events.OnChangingRole;
             }
 
+            _httpFileServer?.Stop();
             Instance = null;
         }
 
@@ -245,9 +253,14 @@
 
         private IEnumerator<float> WriterCoroutine()
         {
-            string fileName = "RoundLog " + _currentRoundStartTime.ToString("yyyy-MM-dd_HH-mm-ss") + ".scpd";
-            using var stream = File.Open(Path.Combine(_directory, fileName), FileMode.Create);
+            string fileName = NameGenerator.GetName() + ".scpd";
+            CurrentLogFileName = fileName;
+            using var stream = File.Open(Path.Combine(LogDirectory, fileName), FileMode.Create);
             _writer = new(stream);
+            
+            _writer.WriteMagic();
+            _writer.WriteVersion(Version.Major, Version.Minor, Version.Build);
+            _writer.Flush();
 
             if (_currentRoundEventLog == null)
             {
