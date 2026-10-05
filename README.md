@@ -21,7 +21,7 @@ The plugin exposes these settings in `Config`:
 # Setup
 
 - Go to config (/EXILED/Configs/Plugins/s_l_game_logger/)
-- Set **listen_host** to ``*``
+- Set **listen_host** to ``'*'``
 - Set **port** to whatever you want
 - Set **motd** to what should appear in the server list
 
